@@ -9,6 +9,13 @@ myViewport = session.Viewport(name='Superposition example')
 myOdb = visualization.openOdb(path='E:\ABAQUS_FILES\check\Job__2LOADS.odb')
 #Odb to be displayed in the predefined viewport
 myViewport.setValues(displayedObject=myOdb)
+myViewport.odbDisplay.setPrimaryVariable(
+    variableLabel='COORD', outputPosition=NODAL, refinement=(INVARIANT, 
+    'Magnitude'), )
+myViewport.odbDisplay.display.setValues(plotState=(
+    CONTOURS_ON_DEF, ))
+myViewport.odbDisplay.display.setValues(plotState=(
+    UNDEFORMED, ))
 #defining Steps & Frames
 firstStep = myOdb.steps['Step-1']
 frame1 = firstStep.frames[0]
@@ -20,41 +27,74 @@ displacement=frame1.fieldOutputs['COORD']
 #Calling Desired output of required nodeset
 centerDisplacement = displacement.getSubset(region=RESULTNODES)
 centerValues = centerDisplacement.values
-displacement=frame2.fieldOutputs['COORD']
+myViewport.odbDisplay.setPrimaryVariable(
+    variableLabel='U', outputPosition=NODAL, refinement=(INVARIANT, 
+    'Magnitude'), )
+myViewport.odbDisplay.display.setValues(plotState=(
+    CONTOURS_ON_DEF, ))
+displacement=frame2.fieldOutputs['U']
 centerDisplacement = displacement.getSubset(region=RESULTNODES)
 centerValues1 = centerDisplacement.values
 # coding: utf-8
 #Creating a csv file to which result is exported
 myoutfile = open('Initial_Final_Coordinates.csv','w+')
-myoutfile.write("InitialCoordinates - - - FinalCoordinates\n")
+myoutfile.write("InitialCoordinates - - - Displacement - - FinalCoordinates\n")
 myoutfile.write("Node ")
 myoutfile.write("x ")
 myoutfile.write("y ")
 myoutfile.write("z ")
+myoutfile.write("u1 ")
+myoutfile.write("u2 ")
+myoutfile.write("u3 ")
 myoutfile.write("x' ")
 myoutfile.write("y' ")
 myoutfile.write("z'\n")
 #for all the nodes in datasets output will be extracted node id,x,y,z Initial final coordinates
 for i,j in zip(centerValues,centerValues1):
+  myViewport.odbDisplay.display.setValues(plotState=(
+    UNDEFORMED, ))
   print 'Node label =', i.nodeLabel
   myoutfile.write(str(i.nodeLabel))
   myoutfile.write(" ")
-  print 'x disp =', i.data[0]
-  myoutfile.write(str(i.data[0]))
+  print 'x disp = %6.5f', i.data[0]
+  a = str(i.data[0])
+  a1 = float(a)
+  myoutfile.write(str(a1))
   myoutfile.write(" ")
-  print 'y disp =', i.data[1]
-  myoutfile.write(str(i.data[1]))
+  print 'y disp = %6.5f', i.data[1]
+  b = str(i.data[1])
+  b1 = float(b)
+  myoutfile.write(str(b1))
   myoutfile.write(" ")
-  print 'z disp =', i.data[2]
-  myoutfile.write(str(i.data[2]))
+  print 'z disp = %6.5f', i.data[2]
+  c = str(i.data[2])
+  c1 = float(c)
+  myoutfile.write(str(c1))
   myoutfile.write(" ")
-  print 'x disp =', j.data[0]
-  myoutfile.write(str(j.data[0]))
+  myViewport.odbDisplay.display.setValues(plotState=(
+    CONTOURS_ON_DEF, ))
+  print 'x disp = %6.5f', j.data[0]
+  d = str(j.data[0])
+  d1 = float(d)
+  myoutfile.write(str(d1))
   myoutfile.write(" ")
-  print 'y disp =', j.data[1]
-  myoutfile.write(str(j.data[1]))
+  print 'y disp = %6.5f', j.data[1]
+  e = str(j.data[1])
+  e1 = float(e)
+  myoutfile.write(str(e1))
   myoutfile.write(" ")
-  print 'z disp =', j.data[2]
-  myoutfile.write(str(j.data[2]))
+  print 'z disp = %6.5f', j.data[2]
+  f = str(j.data[2])
+  f1 = float(f)
+  myoutfile.write(str(f1))
+  myoutfile.write(" ")
+  g = a1 + d1
+  h = b1 + e1
+  i = c1 + f1
+  myoutfile.write(str(g))
+  myoutfile.write(" ")
+  myoutfile.write(str(h))
+  myoutfile.write(" ")
+  myoutfile.write(str(i))
   myoutfile.write("\n")
 myoutfile.close()
