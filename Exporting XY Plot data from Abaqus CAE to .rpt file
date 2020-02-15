@@ -1,0 +1,27 @@
+# -*- coding: mbcs -*-
+from abaqus import *
+from abaqusConstants import *
+from caeModules import *
+from driverUtils import executeOnCaeStartup
+executeOnCaeStartup()
+myViewport = session.Viewport(name='Sbelt_graph')
+#change file path from where odb is to be opened
+o1 = session.openOdb(name='E:/ABAQUS_FILES/SBELT_GRAPH/Job-1963.odb')
+session.viewports['Viewport: 1'].setValues(displayedObject=o1)
+#change file path from where odb is to be opened
+odb = session.odbs['E:/ABAQUS_FILES/SBELT_GRAPH/Job-1963.odb']
+#change the element number to the chain elem number of our file
+xy1 = xyPlot.XYDataFromHistory(odb=odb, 
+    outputVariableName='Section Forces: SF1 at Element 22 Int Point 1 in ELSET OUTPUT', 
+    steps=('Step-1', ), )
+c1 = session.Curve(xyData=xy1)
+xyp = session.XYPlot('XYPlot-1')
+chartName = xyp.charts.keys()[0]
+chart = xyp.charts[chartName]
+chart.setValues(curvesToPlot=(c1, ), )
+session.viewports['Viewport: 1'].setValues(displayedObject=xyp)
+xyp = session.xyPlots['XYPlot-1']
+chartName = xyp.charts.keys()[0]
+chart = xyp.charts[chartName]
+x0 = chart.curves['_temp_1']
+session.writeXYReport(fileName='abaqus.rpt', xyData=(x0, ))
