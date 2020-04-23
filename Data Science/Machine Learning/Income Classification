@@ -1,0 +1,72 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Mar 30 23:46:03 2020
+
+@author: siddh
+"""
+
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score,confusion_matrix
+data_income=pd.read_csv(r"C:\Users\siddh\Downloads\income.csv",na_values=[" ?"])
+data=data_income.copy()
+data.info()
+data.isnull().sum()
+data.describe()
+data['JobType'].describe()
+data['JobType'].value_counts()
+missing=data[data.isnull().any(axis=1)]
+data2=data.dropna(axis=0)
+correlation=data2.corr()
+#to calculate normalized percentage of the variables in a column
+gender=pd.crosstab(index=data2["gender"],columns='count',normalize=True)
+gender_salstat=pd.crosstab(index=data2['gender'],columns=data2['SalStat'],margins=True,normalize=True)
+print(gender_salstat)
+#count plot
+SalStat=sns.countplot(data2['SalStat'])
+#histogram plot
+sns.distplot(data2['age'],bins=10,kde=False)
+SalStat=sns.countplot(data2['age'])
+#boxplot
+sns.boxplot('SalStat','age',data=data2)
+data2.groupby('SalStat')['age'].median()
+JobType_salstat=pd.crosstab(index=data2['JobType'],columns=data2['SalStat'],margins=True,normalize=True)
+#assigning 0 and 1 for salstat
+data2['SalStat']=data2['SalStat'].map({' less than or equal to 50,000':0,' greater than 50,000':1}) 
+print(data2['SalStat'])
+#getting dummies from categorical variables
+new_data=pd.get_dummies(data2,drop_first=True)
+#making y dependant variable as salary status and remaining all as independants say x
+columns_list=list(new_data.columns)
+features=list(set(columns_list)-set(['SalStat']))
+y=new_data['SalStat'].values
+x=new_data[features].values
+train_x,test_x,train_y,test_y=train_test_split(x,y,test_size=0.3,random_state=0)
+logistic=LogisticRegression()
+#fitting all train x & y using logistic regression
+logistic.fit(train_x,train_y)
+logistic.coef_
+logistic.intercept_
+#from the above fitted data, we are predicting test y from test x
+prediction=logistic.predict(test_x)
+print(prediction)
+#confusion matrix is used to check the accuracy of predictions
+confusion_matrix=confusion_matrix(test_y,prediction)
+print(confusion_matrix)
+#to know the accuracy of the model built
+accuracy_score=accuracy_score(test_y,prediction)
+print(accuracy_score)
+#to know the no of samples that are wrongly predicted
+print('Misclassified samples: %d' %(test_y != prediction).sum())
+#knn library
+from sklearn.neighbors import KNeighborsClassifier
+import matplotlib.pyplot as plt
+KNN_classifier=KNeighborsClassifier(n_neighbors=5)
+KNN_classifier.fit(train_x,train_y)
+prediction=KNN_classifier.predict(tes_x)
+confusion_matrix=confusion_matrix(test_y,prediction)
+print(confusion_matrix)
