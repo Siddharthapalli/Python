@@ -1,0 +1,118 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score,confusion_matrix
+x=pd.read_csv(r"C:\Users\siddh\Downloads\cars_sampled.csv")
+data=x.copy()
+print(data.info())
+data.isnull().sum()
+price_count=data['price'].value_counts().sort_index()
+sns.distplot(data['price'])
+data['price'].describe()
+sum(data['price']<50)
+price_count=data['powerPS'].value_counts().sort_index()
+cars=data[
+    (data.yearOfRegistration <= 2018)
+    &(data.yearOfRegistration >= 2000)
+    &(data.price <= 250000)
+    &(data.price >= 100)
+    &(data.powerPS >=50)
+    ]
+cars['monthOfRegistration']/=12
+cars['Age']=2018-cars['yearOfRegistration']+cars['monthOfRegistration']
+cars['Age']=round(cars['Age'],2)
+cars['Age'].describe()
+cars=cars.drop(columns=['yearOfRegistration','monthOfRegistration'])
+sns.distplot(cars['Age'])
+sns.boxplot(y=cars['Age'])
+sns.distplot(cars['price'])
+sns.boxplot(y=cars['price'])
+sns.regplot(x='Age',y='price',scatter=True,fit_reg=False,data=cars)
+pd.crosstab(cars['seller'],columns='count',normalize=True)
+sns.countplot(x='offerType',data=cars)
+cars['offerType'].value_counts()
+cars['abtest'].value_counts()
+sns.countplot(x='abtest',data=cars)
+cars['vehicleType'].describe()
+cars['gearbox'].value_counts()
+pd.crosstab(cars['gearbox'],columns='count',normalize=True)
+sns.boxplot(x='offerType',y='price',data=cars)
+col=['dateCrawled','offerType','abtest','seller','name','dateCreated','lastSeen','postalCode']
+cars=cars.drop(columns=col,axis=1)
+cars_copy=cars.copy()
+cars_select1=cars_copy.select_dtypes(exclude=[object])
+correlation=cars_select1.corr()
+cars_select1.corr().loc[:,'price'].abs().sort_values(ascending=False)
+cars_omit=cars.dropna(axis=0)
+cars_omit=pd.get_dummies(cars_omit,drop_first=False)
+sns.pairplot((cars_omit))
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+x1=cars_omit.drop(['price'],axis='columns',inplace=False)
+y1=cars_omit['price']
+prices=pd.DataFrame({"1.before":y1,"2.after":np.log(y1)})
+prices.hist()
+y1=np.log(y1)
+X_train,X_test,y_train,y_test=train_test_split(x1,y1,test_size=0.3,random_state=3)
+print(X_train.shape,X_test.shape,y_train.shape,y_test.shape)
+base_pred=np.mean(y_test)
+print(base_pred)
+base_pred=np.repeat(base_pred,len(y_test))
+base_root_mean_square_error=np.sqrt(mean_squared_error(y_test,base_pred))
+lgr=LinearRegression(fit_intercept=True)
+model_lin1=lgr.fit(X_train,y_train)
+print (model.intercept_,results.coef_)
+cars_prediction_lin1=lgr.predict(X_test)
+lin_mse1=mean_squared_error(y_test,cars_prediction_lin1)
+lin_rmse1=np.sqrt(lin_mse1)
+r2_lin_test1=model_lin1.score(X_test,y_test)
+r2_lin_train1=model_lin1.score(X_train,y_train)
+residuals1=y_test-cars_prediction_lin1
+sns.regplot(x=cars_prediction_lin1,y=residuals1,scatter=True,fit_reg=False)
+residuals1.describe()
+rf=RandomForestRegressor(n_estimators=100,max_features='auto',max_depth=100,min_samples_split=10,min_samples_leaf=4,random_state=1)
+model_rf1=rf.fit(X_train,y_train)
+cars_predictions_rf1=rf.predict(X_test)
+rf_mse1=mean_squared_error(y_test,cars_predictions_rf1)
+rf_rmse1=np.sqrt(rf_mse1)
+r2_rf_test1=model_rf1.score(X_test,y_test)
+r2_rf_train1=model_rf1 .score(X_train,y_train)
+cars.info()
+cars_imputed = cars.apply(lambda x:x.fillna(x.median()) \
+                          if x.dtype=='float' else \
+                              x.fillna(x.value_counts().index[0]))
+cars_imputed.isnull().sum()
+cars_imputed=pd.get_dummies(cars_imputed,drop_first=True)
+x2=cars_imputed.drop(['price'],axis='columns',inplace=False)
+y2=cars_imputed['price']
+prices=pd.DataFrame({"1.before":y2,"2.after":np.log(y2)})
+prices.hist()
+y2=np.log(y2)
+X_train1,X_test1,y_train1,y_test1=train_test_split(x2,y2,test_size=0.3,random_state=3)
+print(X_train1.shape,X_test1.shape,y_train1.shape,y_test1.shape)
+base_pred=np.mean(y_test1)
+print(base_pred)
+base_pred=np.repeat(base_pred,len(y_test1))
+base_root_mean_square_error=np.sqrt(mean_squared_error(y_test1,base_pred))
+lgr2=LinearRegression(fit_intercept=True)
+model_lin2=lgr2.fit(X_train1,y_train1)
+cars_prediction_lin2=lgr2.predict(X_test1)
+lin_mse2=mean_squared_error(y_test1,cars_prediction_lin2)
+lin_rmse2=np.sqrt(lin_mse2)
+rf2=RandomForestRegressor(n_estimators=100,max_features='auto',max_depth=100,min_samples_split=10,min_samples_leaf=4,random_state=1)
+model_rf2=rf2.fit(X_train1,y_train1)
+cars_predictions_rf2=rf2.predict(X_test1)
+rf_mse2=mean_squared_error(y_test1,cars_predictions_rf2)
+rf_rmse2=np.sqrt(rf_mse2)
+r2_rf_test2=model_rf2.score(X_test1,y_test1)
+r2_rf_train2=model_rf2.score(X_train1,y_train1)
