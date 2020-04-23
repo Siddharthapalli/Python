@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Apr 13 17:00:53 2020
+
+@author: siddh
+"""
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score,confusion_matrix
+from sklearn.linear_model import LinearRegression
+x=pd.read_csv(r"C:\Users\siddh\OneDrive\Desktop\sidhu\ANALYTICS_VIDHYA\blackfriday\train.csv")
+##################checking impact of variables on purchase
+sns.countplot(x['Age'],hue=x['Gender'])
+p=x['User_ID'].nunique()
+def unique(column):
+    y=np.array(column)
+    print(np.unique(y))
+unique(x['Occupation'])
+plt.hist(x['Age'],color='green',edgecolor='white',bins=7)
+p=pd.crosstab(x['Product_ID'],columns=x['Purchase'],dropna=True)
+m=pd.crosstab(x['User_ID'],columns='count')
+plt.hist(x['Gender'],edgecolor='black')
+pd.crosstab(x['Gender'],columns='count')
+L=pd.crosstab(x['Gender'],columns=x['Purchase'])
+pd.crosstab(x['Gender'],columns=x['Purchase'],margins=True,normalize=True)
+x['Gender'].value_counts()
+pd.crosstab(x['City_Category'],columns=x['Purchase'],margins=True,normalize=True)
+pd.crosstab(x['Stay_In_Current_City_Years'],columns=x['Purchase'],margins=True,normalize=True)
+sns.boxplot(x=x['City_Category'],y=x['Purchase'])
+data=x.copy()
+col=['Product_Category_2','Product_Category_3','User_ID','Product_ID']
+data1=data.drop(columns=col,axis=1)
+y=pd.read_csv(r"C:\Users\siddh\OneDrive\Desktop\sidhu\ANALYTICS_VIDHYA\blackfriday\test.csv")
+data_test=y.drop(columns=col,axis=1)
+data_test=pd.get_dummies(data_test,drop_first=True)
+group=data1["Product_ID"]
+g=data1.groupby('Product_ID')
+n=g.get_group('P00000142')
+sns.boxplot(x=n['Stay_In_Current_City_Years'],y=n['Purchase'])
+sns.boxplot(x=n['Occupation'],y=n['Purchase'])
+count123=data1['Occupation'].value_counts().sort_index()
+data1['Purchase'].describe()
+sum(data1['Purchase']<100)
+sum(data1['Purchase']>23000)
+sns.boxplot(x=data1['Gender'],y=data1['Purchase'])
+sns.boxplot(x=data1['Age'],y=data1['Purchase'])
+sns.boxplot(x=data1['Occupation'],y=data1['Purchase'])
+sns.boxplot(x=data1['City_Category'],y=data1['Purchase'])
+sns.boxplot(x=data1['Marital_Status'],y=data1['Purchase'])
+data1.isnull().sum()
+m=data1['Product_ID'].value_counts().sort_index()
+data1=data1[(data1.Purchase <= 20000)] 
+sns.boxplot(x=data1['Gender'],y=data1['Purchase'])
+sns.boxplot(x=data1['Age'],y=data1['Purchase'])
+sns.boxplot(x=data1['Occupation'],y=data1['Purchase'])
+sns.boxplot(x=data1['City_Category'],y=data1['Purchase'])
+sns.boxplot(x=data1['Marital_Status'],y=data1['Purchase'])
+final=pd.get_dummies(data1,drop_first=True)
+final.info()
+x=final.drop(['Purchase'],axis=1,inplace=False)
+y=final['Purchase']
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+train_x,test_x,train_y,test_y=train_test_split(x,y,test_size=1,random_state=0)
+######Random forest
+rf2=RandomForestRegressor(n_estimators=100,max_features='auto',max_depth=100,min_samples_split=4,min_samples_leaf=50,random_state=1)
+model_rf2=rf2.fit(train_x,train_y)
+cars_predictions_rf2=model_rf2.predict(test_x)
+rf_mse5=mean_squared_error(test_y,cars_predictions_rf2)
+rf_rmse5=np.sqrt(rf_mse5)
+################prediction for test data
+cars_predictions_test=model_rf2.redict(data_test)
+#################preparing submission file
+sample=pd.read_csv(r'C:\Users\siddh\Downloads\sample_submission_V9Inaty.csv')
+sample['Purchase']=cars_predictions_test
